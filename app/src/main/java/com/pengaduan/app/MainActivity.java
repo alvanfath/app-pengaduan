@@ -1,6 +1,8 @@
 package com.pengaduan.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,8 +17,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
-    private EditText textNama, emailText, phoneText, passwordText;
-    private Button buttonRegis;
+    private static final String PREFS_NAME = "AppPrefs";
+    private static final String TOKEN_KEY = "auth_token";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,65 +32,20 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        LocalStorage localStorage = new LocalStorage(MainActivity.this);
+        String token = localStorage.getToken();
 
-        //setting variable
-        // Menghubungkan komponen UI
-        textNama = findViewById(R.id.textNama);
-        emailText = findViewById(R.id.emailText);
-        phoneText = findViewById(R.id.phoneText);
-        passwordText = findViewById(R.id.passwordText);
-        buttonRegis = findViewById(R.id.buttonRegis);
-
-        // Menambahkan TextWatcher untuk setiap EditText
-        textNama.addTextChangedListener(textWatcher);
-        emailText.addTextChangedListener(textWatcher);
-        phoneText.addTextChangedListener(textWatcher);
-        passwordText.addTextChangedListener(textWatcher);
-    }
-
-    private final android.text.TextWatcher textWatcher = new android.text.TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-            // Memeriksa apakah ada EditText yang kosong
-            checkForm();
+        if (token == null || token.isEmpty()) {
+            // Jika tidak ada token, lempar ke halaman login
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
         }
-
-        @Override
-        public void afterTextChanged(android.text.Editable editable) {}
-    };
-
-    // Fungsi untuk mengecek apakah semua form terisi
-    private void checkForm() {
-        String name = textNama.getText().toString();
-        String email = emailText.getText().toString();
-        String phone = phoneText.getText().toString();
-        String password = passwordText.getText().toString();
-
-        // Jika semua EditText terisi, ubah warna tombol menjadi primary dan aktifkan tombol
-        if (!name.isEmpty() && !email.isEmpty() && !phone.isEmpty() && !password.isEmpty()) {
-            buttonRegis.setBackgroundTintList(getResources().getColorStateList(R.color.primary));  // Ganti dengan warna tombol aktif
-            buttonRegis.setEnabled(true);  // Tombol aktif
-        } else {
-            buttonRegis.setBackgroundTintList(getResources().getColorStateList(android.R.color.darker_gray));  // Tombol abu-abu
-            buttonRegis.setEnabled(false);  // Tombol tidak aktif
-        }
-    }
-
-
-    public void onRegister(View view) {
-        // Mengambil nilai dari EditText
-        String nama = textNama.getText().toString();
-        String email = emailText.getText().toString();
-        String phone = phoneText.getText().toString();
-        String password = passwordText.getText().toString();
-
-        // Menampilkan Toast dengan semua nilai
-        Toast.makeText(this, "Nama: " + nama + "\nEmail: " + email + "\nNo.Telp: " + phone + "\nPassword: " + password, Toast.LENGTH_SHORT).show();
-
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        Intent intent = new Intent(MainActivity.this, HomePageActivity.class);
         startActivity(intent);
+        finish();
+        return;
     }
+
 }
